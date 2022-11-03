@@ -1,0 +1,8 @@
+/bin/
+
+#VSCode java project
+.vscode/
+
+#Eclipse java project
+.project
+.classpath

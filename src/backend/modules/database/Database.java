@@ -1,33 +1,84 @@
 package backend.modules.database;
 import java.util.ArrayList;
 import backend.modules.shared.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Database{
+    private Connection conn = null;
     /*
-     * 
+     * option 1: connect/disconnect for one query --> connect/disconnect = private --> better because
+     * users of the class does not have to manually connect/disconnect for every query and can just call the method 
+     * for the query they need
+     * option 2: programmer responsible for connecting, querying, and disconnecting --> connect/disconnect = public
      */
     public Database(){
-
+        //set variables here if necessary
     }
     /*
      * Connect to the mysql database using Connector/J
      */
-    public void connect(){
-
+    private void connect(){
+        try{
+            conn = DriverManager.getConnection(null); //change this
+        }catch (SQLException sqle) {
+			System.out.println ("Fail to connect to db: " + sqle.getMessage());
+		}
     }
 
     /* 
      * Disconnect from mysql database after finishing with queries
      */
-    public void disconnect(){
-
+    private void disconnect(){
+        try {
+            if (conn != null) {
+                conn.close();
+            }
+            
+        } catch (SQLException sqle) {
+            System.out.println("Fail to disconnect from db: " + sqle.getMessage());
+        }
     }
 
     /*
-     * Add user to the database 
+     * Add user and their info to the database 
      */
     public void addUser(String email, String password, String displayName, ArrayList<String> preferences){
+        //insert to Preferences table
+		PreparedStatement ps = null;
+        PreparedStatement ps2 = null;
+		try {
+            connect();
+            //insert to Users table
+			ps = conn.prepareStatement("INSERT INTO users(email, password, displayName) VALUES (?, ?, ?)");
+			ps.setString(1, email);
+            ps.setString(2, password);
+            ps.setString(3, displayName);
+            ps.execute();
+            
+            //insert to Preferences table
+            ps2 = conn.prepareStatement("INSERT INTO preferences(userId, preferenceId) SELECT user.userId, pref.preferenceId FROM users user, preferenceTypes pref WHERE pref.preferenceName = ? AND user.displayName = ?");
+            for(String pref : preferences){
+                ps2.setString(1, pref);
+                ps2.setString(2, displayName);
+            }
 
+
+		}catch (SQLException sqle) {
+			System.out.println ("Exception when adding new user: " + sqle.getMessage());
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}	
+                disconnect();	
+			} catch (SQLException sqle) {
+				System.out.println("Exception when finalizing new user's insertion: " + sqle.getMessage());
+			}
+		}
     }
 
     /*
@@ -36,7 +87,7 @@ public class Database{
      * @param displayName: (need to make this name unique for all users if to use this param to look up users)
      */
     public void modifyPreferences(String displayName, String new_preference){
-
+        //modify Preferences table
     }
 
     /*

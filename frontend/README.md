@@ -1,3 +1,17 @@
+To run the project on your local machine, run: 
+
+### `npm start`
+
+A new browser window should open displaying the React App on http://localhost:3000. If this does not work:
+
+1) Make sure you are navigated to the Frontend folder.
+2) If this is your first time runnning the project, run:
+    ### `npm install react-scripts`
+    Try running `npm start` again. It should work now. 
+
+You should now be able to run the project using only `npm start`
+
+----------------------------------------------------------------------------------------------------
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

@@ -44,8 +44,14 @@
     color: #7439db;
   }
 
-  
   .link-btn {
     background: none;
     color: white;
   }
+
+  .error-message {
+    background-color: none;
+    padding: 5px;
+    color: #EE2222
+  }
+

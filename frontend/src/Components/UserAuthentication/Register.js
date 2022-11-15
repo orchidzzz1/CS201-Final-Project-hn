@@ -10,7 +10,13 @@ const Register = (props) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(email);
-        navigate('dashboard')
+        if(email.search("@usc.edu") === -1) {
+            console.log("Please enter a USC email");
+        }
+        else {
+            navigate('../dashboard')
+        }
+       
     }
 
     return (

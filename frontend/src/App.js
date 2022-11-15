@@ -5,7 +5,7 @@ import './App.css';
 import LogIn from "./Components/UserAuthentication/LogIn";
 import Register from "./Components/UserAuthentication/Register";
 import CreatePost from "./Components/CreatePost/CreatePost";
-import Dashboard from "./Components/Home/Posts/Dashboard";
+import Dashboard from "./Components/Dashboard/Dashboard";
 
 
 const App = () => {

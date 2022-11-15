@@ -9,7 +9,7 @@
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   }
   
-  .userAuthentication-container, .login-form, .register-form {
+  .userAuthentication-container, .login-form, .register-form, .createpost-form{
     display: flex;
     flex-direction: column;
   }
@@ -28,7 +28,7 @@
     padding: 0.25rem 0;
   }
   
-  input {
+  input{
     margin: 0.5rem 0;
     padding: 1rem;
     border: none;
@@ -43,6 +43,7 @@
     cursor: pointer;
     color: #7439db;
   }
+
   
   .link-btn {
     background: none;

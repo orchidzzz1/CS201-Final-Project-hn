@@ -13,10 +13,12 @@ const LogIn = (props) => {
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        if(email.search("@usc.edu") === -1) {
+        if(email === '' || pass === '') {
+            setErrorMessage("Please fill all fields");
+        }
+        else if(email.search("@usc.edu") === -1) {
             console.log(email);
-            setErrorMessage('PLease enter a USC email');
-    
+            setErrorMessage('Please enter a USC email');
         }
         else {
             const account = users.find((user) => user.email === email);

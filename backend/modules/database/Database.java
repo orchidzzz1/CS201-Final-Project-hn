@@ -4,7 +4,7 @@ import backend.modules.shared.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+//import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class Database{
@@ -23,7 +23,7 @@ public class Database{
      */
     private void connect(){
         try{
-            conn = DriverManager.getConnection(null); //change this
+            conn = DriverManager.getConnection("jdbc:mysql://34.28.203.195:csci-201-project-368421:us-central1:projectdb?user=root");
         }catch (SQLException sqle) {
 			System.out.println ("Fail to connect to db: " + sqle.getMessage());
 		}
@@ -44,12 +44,22 @@ public class Database{
     }
 
     /*
+     * Check if the email and password already exist in the database
+     * @return true if they exist
+     */
+    public int authenticateUser(String email, String password){
+        int userId = -1;
+        return userId;
+    }
+
+    /*
      * Add user and their info to the database 
      */
-    public void addUser(String email, String password, String displayName, ArrayList<String> preferences){
+    public int addUser(String email, String password, String displayName, ArrayList<String> preferences){
         //insert to Preferences table
 		PreparedStatement ps = null;
         PreparedStatement ps2 = null;
+        int userId = -1;
 		try {
             connect();
             //insert to Users table
@@ -66,6 +76,8 @@ public class Database{
                 ps2.setString(2, displayName);
             }
 
+            //get userId in order to return userId to caller
+
 
 		}catch (SQLException sqle) {
 			System.out.println ("Exception when adding new user: " + sqle.getMessage());
@@ -79,6 +91,7 @@ public class Database{
 				System.out.println("Exception when finalizing new user's insertion: " + sqle.getMessage());
 			}
 		}
+        return userId;
     }
 
     /*
@@ -96,17 +109,10 @@ public class Database{
      * @param displayName: (need to make this name unique for all users if to use this param to look up users)
      * @param preference: the activity preference where user would like to receive/not receive notification
      */
-    public void modifyNotification(String displName, String preference){
+    public void modifyNotification(String displayName, String preference){
 
     }
 
-    /*
-     * Check if the email and password already exist in the database
-     * @return true if they exist
-     */
-    public boolean authenticateUser(String email, String password){
-        return true;
-    }
 
     /*
      * Get the display name and list of activity/time/notification preferences.

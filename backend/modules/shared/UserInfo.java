@@ -3,6 +3,8 @@ package backend.modules.shared;
 import java.util.ArrayList;
 
 public class UserInfo {
-    String displayName;
-    ArrayList<String> preferences;
+    public String displayName;
+    public String email;
+    public ArrayList<String> preferences;
+    public ArrayList<Boolean> notifications;
 }

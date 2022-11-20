@@ -14,9 +14,14 @@ import com.events.studentevents.model.User;
 @RestController
 public class UserController {
 	
+	
+	//Creates a new instance of the UserDAO interface, and uses this to return appropriate values
 	@Autowired
 	private UserDAO uDao;
 	
+	
+	//This annotation means any GET requests at the address url-of-server/users will cause 
+	//this function to execute
 	@GetMapping("/users")
 	public List<User> getUsers(){
 		
@@ -24,10 +29,13 @@ public class UserController {
 		
 	}
 	
-	@GetMapping("/Users/{id}")
+	//This annotation means any GET requests to url-of-server/users/id will cause this 
+	//code to execute
+	@GetMapping("/users/{id}")
 	public User getUserById(@PathVariable int id) {
 		return uDao.getByid(id);
 		
 	}
 
+	//PostMapping is another annotation option for any POST requests
 }

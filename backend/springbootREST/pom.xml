@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.events</groupId>
-	<artifactId>studentevents</artifactId>
+	<artifactId>springbootREST</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>studentevents</name>
-	<description>Student events</description>
+	<name>springbootREST</name>
+	<description>REST API Endpoints for studentevents</description>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>

@@ -3,6 +3,8 @@ package com.events.studentevents;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+
+//This class just initializes the application
 @SpringBootApplication
 public class StudenteventsApplication {
 

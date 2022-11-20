@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 /* 
  * Classes here represent the structure of the data stored in the database
  * For e.g. the user table should store id, email, password, and we create associated fields
+ * The type and name of the fields in this class must match EXACTLY to the type and name of 
+ * fields in the table. 
  * */
 @Data
 @AllArgsConstructor

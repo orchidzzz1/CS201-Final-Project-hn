@@ -6,3 +6,6 @@
 #Eclipse java project
 .project
 .classpath
+
+#library for unit testing
+hsqldb-2.4.0.jar

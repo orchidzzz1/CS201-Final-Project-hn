@@ -9,25 +9,30 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.security.Timestamp;
 
+/*
+ * Usage of class: call the approriate public method for needed query.
+ * Each query creates a new connection to database and disconnects when done with the query
+ * So that user of the class does not need keep track of calling connect/disconnect themselves
+ */
 public class Database{
-    private Connection conn = null;
+    protected Connection conn = null;
 
     public Database(){
         //set variables here if necessary
     }
     /*
-     * Connect to the mysql database using Connector/J
+     * Connect to the cloudsql database using Connector/J
      */
     protected void connect(){
         try{
-            conn = DriverManager.getConnection("jdbc:mysql://34.28.203.195:csci-201-project-368421:us-central1:projectdb?user=root");
+            conn = DriverManager.getConnection("jdbc:mysql://34.28.203.195/projectData?user=root&password=12345678");
         }catch (SQLException sqle) {
 			System.out.println ("Fail to connect to db: " + sqle.getMessage());
 		}
     }
 
     /* 
-     * Disconnect from mysql database after finishing with each query
+     * Disconnect from cloudsql database after finishing with each query
      */
     protected void disconnect(){
         try {
@@ -50,13 +55,13 @@ public class Database{
 		try {
             connect();
             //insert to Users table
-			ps = conn.prepareStatement("SELECT userId FROM 201projectdb.users WHERE email = ? AND users.password = ?");
+			ps = conn.prepareStatement("SELECT userId FROM users WHERE email = ? AND users.password = ?");
 			ps.setString(1, email);
             ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
 
             //get userId in order to return userId to caller
-            if(rs != null){
+            if(rs.next()){
                 userId = rs.getInt("userId");
                 rs.close();
             }
@@ -82,31 +87,37 @@ public class Database{
      */
     public int registerUser(String email, String password, String displayName, ArrayList<String> preferences){
 		PreparedStatement ps = null;
+        PreparedStatement ps1 = null;
         PreparedStatement ps2 = null;
         
         int userId = -1;
-        //if user exists already, registration fails
-        if(authenticateUser(email, password)!= -1) {
-        	return userId;
-        }
 		try {
             connect();
+            //if email exists already, registration fails
+            ps1 = conn.prepareStatement("SELECT email FROM users WHERE email = ?");
+            ps1.setString(1, email);
+            ResultSet rs1 = ps1.executeQuery();
+            if(rs1.next()){
+                return userId;
+            }
+
             //insert to Users table
-			ps = conn.prepareStatement("INSERT INTO 201projectdb.users(email, password, displayName) VALUES (?, ?, ?) RETURNING userId");
+			ps = conn.prepareStatement("INSERT INTO users(email, password, displayName) VALUES (?, ?, ?)", new String[] { "userId" });
 			ps.setString(1, email);
             ps.setString(2, password);
             ps.setString(3, displayName);
-            ResultSet rs = ps.executeQuery();
+            ps.executeUpdate();
             
             //get userId of newly inserted row
-            userId = rs.getInt("userId");
-            rs.close();
+            ResultSet rs = ps.getGeneratedKeys();
+            if(rs.next()){
+                userId = rs.getInt("userId");
+                rs.close();
+            }
             
             //insert to Preferences table
-            String sqlString = "INSERT INTO preferences(userId, preferenceId)"
-                            + " SELECT user.userId, pref.preferenceId" 
-                            + " FROM users user, preferenceTypes pref" 
-                            + " WHERE pref.preferenceName = ? AND user.displayName = ?";
+            String sqlString = "INSERT INTO preferences(userId, preferenceId, alert)"
+                            + " SELECT ?, (SELECT preferenceId FROM preferenceTypes pref WHERE pref.preferenceName = ?), FALSE";
             ps2 = conn.prepareStatement(sqlString);
             for(String pref : preferences){
                 ps2.setInt(1, userId);
@@ -137,9 +148,9 @@ public class Database{
         PreparedStatement ps = null;
 		try {
             connect();
-            String sqlString = "DELETE FROM 201projectdb.preferences pref" 
-                            +" JOIN 201.projectdb.preferencetpes types" 
-                            +" WHERE pref.userId = ? AND types.preference = ?";
+            String sqlString = "DELETE FROM preferences pref" 
+                            +" WHERE pref.userId = ?"
+                            +" AND pref.preferenceId = (SELECT preferenceId FROM preferencetypes types WHERE types.preferenceName = ?)";
 			ps = conn.prepareStatement(sqlString);
 			ps.setInt(1, userId);
             ps.setString(2, preference);
@@ -160,25 +171,23 @@ public class Database{
     }
 
     /*
-     * Remove a user's preference
+     * Add a user's preference
      * @param userId: should be retrieved from front end in order to identify the user
-     * @param preference: preference to be removed
+     * @param preference: preference to be added
      */
     public void addPreferenceToUser(int userId, String preference){
         PreparedStatement ps = null;
 		try {
             connect();
-            String sqlString = "INSERT INTO 201projectdb.preferences(userId, preference, alert)"
-                            + " SELECT (?, types.preferenceId, FALSE)"
-                            + " FROM 201projectdb.preferencetypes types" 
-                            + " WHERE types.preferenceName = ?";
+            String sqlString = "INSERT INTO preferences(userId, preferenceID, alert)"
+                            + " VALUES (?, (SELECT types.preferenceId FROM preferencetypes types WHERE types.preferenceName = ?), FALSE)";
 			ps = conn.prepareStatement(sqlString);
 			ps.setInt(1, userId);
             ps.setString(2, preference);
-            ps.execute();
+            ps.executeUpdate();
 
 		}catch (SQLException sqle) {
-			System.out.println ("Exception when removing user's preference: " + sqle.getMessage());
+			System.out.println ("Exception when adding user's preference: " + sqle.getMessage());
 		} finally {
 			try {
 				if (ps != null) {
@@ -203,14 +212,13 @@ public class Database{
         PreparedStatement ps = null;
 		try {
             connect();
-            String sqlString = "UPDATE 201projectdb.preferences pref" 
-                            + " SET pref.alert = NOT pref.alert FROM pref" 
-                            + " INNER JOIN 201projectdb.preferencetypes types ON pref.preferenceId = types.preferenceId" 
-                            + " WHERE pref.userId = ? AND types.preferenceName = ?";
+            String sqlString = "UPDATE preferences pref" 
+                            + " SET pref.alert = NOT pref.alert" 
+                            + " WHERE pref.userId = ? AND pref.preferenceId = (SELECT types.preferenceId FROM preferencetypes types WHERE types.preferenceName = ?)";
 			ps = conn.prepareStatement(sqlString);
 			ps.setInt(1, userId);
             ps.setString(2, preference);
-            ps.execute();
+            ps.executeUpdate();
 
 		}catch (SQLException sqle) {
 			System.out.println ("Exception when modifying notification setting: " + sqle.getMessage());
@@ -226,12 +234,12 @@ public class Database{
         }
     }
 
-
     /*
      * Get the display name and list of activity/time/notification preferences.
      * Use this object to send to front end (as Json) in order to display user's information
      * on the User page
      * @param userId: should be retrieved from front end in order to identify the user 
+     * @return UserInfo if the user exists; null if the user does not exist
      * Note: preferences include activities and times (weekdays)
      */
     public UserInfo getUserInfo(int userId){
@@ -242,10 +250,10 @@ public class Database{
 		try {
             connect();
             //get user's basic info
-            String sqlString = "SELECT user.email, user.displayName, types.preferenceName, pref.notification"
-                            +" FROM 201projectdb.users user" 
-                            +" INNER JOIN 201projectdb.preferences pref ON user.userId = pref.userId" 
-                            +" INNER JOIN 201projectdv.preferencetypes types ON pref.preferenceId = types.preferenceId" 
+            String sqlString = "SELECT user.email, user.displayName, types.preferenceName, pref.alert"
+                            +" FROM users user" 
+                            +" INNER JOIN preferences pref ON user.userId = pref.userId" 
+                            +" INNER JOIN preferencetypes types ON pref.preferenceId = types.preferenceId" 
                             +" WHERE userId = ?";
 			ps = conn.prepareStatement(sqlString);
 			ps.setInt(1, userId);
@@ -253,10 +261,12 @@ public class Database{
 
             //if query result has no row, do nothing
             //else, update user's info with query result
-            if(rs.first()){
+            
+            if(rs.next()){
                 user = new UserInfo();
                 user.displayName = rs.getString("displayName");
                 user.email = rs.getString("email");
+                
                 //get user's preferences and notification settings
                 do{
                     user.preferences.add(rs.getString("preferenceName"));
@@ -288,7 +298,7 @@ public class Database{
     	try {
             connect();
             Statement st = conn.createStatement();
-            ResultSet rs  = st.executeQuery("SELECT preferenceName FROM 201projectdb.preferencetypes");
+            ResultSet rs  = st.executeQuery("SELECT preferenceName FROM preferencetypes");
             //iterate through result and append to list 
             while(rs.next()){
                 preferenceTypes.add(rs.getString("preferenceName"));

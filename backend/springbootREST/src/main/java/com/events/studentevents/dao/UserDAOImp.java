@@ -29,6 +29,7 @@ public class UserDAOImp implements UserDAO {
 	//Still a work-in-progress, will need to change some aspects.
 	//In the future: will take a string (email address), and then return info about the user
 	@Override
+
 	public User getByEmail(String email) {
 		try {
 			User res = template.queryForObject("SELECT * FROM Users WHERE email=?", new BeanPropertyRowMapper<User>(User.class), email);
@@ -37,6 +38,7 @@ public class UserDAOImp implements UserDAO {
 			
 			return null;
 		}
+
 	}
 
 	
@@ -47,6 +49,7 @@ public class UserDAOImp implements UserDAO {
 		List<User> res = template.query("SELECT * FROM Users", new BeanPropertyRowMapper<User>(User.class));
 		return res;
 	}
+
 
 	@Override
 	public boolean authenticate(String email, String password) {
@@ -70,6 +73,7 @@ public class UserDAOImp implements UserDAO {
 			return -1;
 		}
 	}
+
 	
 	
 	

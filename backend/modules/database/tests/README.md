@@ -1,0 +1,3 @@
+This folder contains tests for the database package.
+
+The process is to re-create the cloudsql database using HSQLDB (2.4.0) in-mem database. Achieve this by creating another test database class that inherits from Database class' query methods and overrides connect and diconnect methods so that it will not make testing changes to the actual CloudSQL database. The class also executes SQL scripts to be run on CloudSQL in order to create tables. Also use JUnit5 to write tests for all necessary public methods in Database class.

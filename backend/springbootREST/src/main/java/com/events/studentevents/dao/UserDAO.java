@@ -10,6 +10,7 @@ public interface UserDAO {
 	
 	int save(User user);
 	
+
 	User getByEmail(String email);
 	
 	List<User> getAll();
@@ -17,5 +18,6 @@ public interface UserDAO {
 	boolean authenticate(String email, String password);
 	
 	int insertUser(User user);
+
 
 }

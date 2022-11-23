@@ -3,6 +3,7 @@ package com.events.studentevents.dao;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -28,9 +29,16 @@ public class UserDAOImp implements UserDAO {
 	//Still a work-in-progress, will need to change some aspects.
 	//In the future: will take a string (email address), and then return info about the user
 	@Override
-	public User getByid(int id) {
-		// TODO Auto-generated method stub
-		return template.queryForObject("SELECT * FROM Users", new BeanPropertyRowMapper<User>(User.class), id);
+
+	public User getByEmail(String email) {
+		try {
+			User res = template.queryForObject("SELECT * FROM Users WHERE email=?", new BeanPropertyRowMapper<User>(User.class), email);
+			return res;
+		} catch (EmptyResultDataAccessException e) {
+			
+			return null;
+		}
+
 	}
 
 	
@@ -41,6 +49,31 @@ public class UserDAOImp implements UserDAO {
 		List<User> res = template.query("SELECT * FROM Users", new BeanPropertyRowMapper<User>(User.class));
 		return res;
 	}
+
+
+	@Override
+	public boolean authenticate(String email, String password) {
+		// TODO Auto-generated method stub
+		
+		User res = template.queryForObject("SELECT * FROM Users WHERE email=? AND password=?", new BeanPropertyRowMapper<User>(User.class), new Object[] {email, password});
+		return res != null;
+	}
+
+	@Override
+	public int insertUser(User user) {
+		// TODO Auto-generated method stub
+		
+		try {
+			if (this.getByEmail(user.getEmail()) != null) {
+				return 0;
+			}
+			template.update("INSERT INTO Users (email, password) VALUES (?, ?)", new Object[] {user.getEmail(), user.getPassword()});
+			return 1;
+		} catch (Exception e) {
+			return -1;
+		}
+	}
+
 	
 	
 	

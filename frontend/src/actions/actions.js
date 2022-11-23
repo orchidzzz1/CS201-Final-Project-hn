@@ -1,6 +1,20 @@
-// import {FETCH_ALL, FETCH_BY_SEARCH, CREATE, DELETE, RSVP} from '../constants/actionTypes';
+import { LOGIN } from '../constants/actionTypes';
 
-// import * as api from '../api/index.js';
+import * as api from '../api/index.js';
+
+export const actionLogIn = (formData, navigate) => async (dispatch) => {
+  try {
+    const { data } = await api.APILogIn(formData);
+    
+    dispatch({ type: LOGIN, data });
+    
+    navigate('/dashboard')
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
 // export const createPost = (post, history) => async (dispatch) => {
 //     try {

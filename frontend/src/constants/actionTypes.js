@@ -1,3 +1,4 @@
+export const LOGIN = 'LOGIN';
 // export const CREATE = 'CREATE';
 // export const DELETE = 'DELETE';
 // export const FETCH_ALL = 'FETCH_ALL';

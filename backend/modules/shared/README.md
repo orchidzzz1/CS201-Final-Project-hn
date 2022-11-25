@@ -1,0 +1,1 @@
+This folder contains all Java classes that are used for database and server to store and pass information. These classes can also be used for serialization and deserialization.

@@ -9,6 +9,8 @@ const LogIn = (props) => {
     // eslint-disable-next-line
     const [authenticated, setauthenticated] = useState(localStorage.getItem(localStorage.getItem("authenticated")|| false));
     const [errorMessage, setErrorMessage] = useState('');
+
+    //populate with API call
     const users = [{ email: "tommytrojan@usc.edu", pass: "password" }];
 
     const handleSubmit = (e) => {
@@ -52,6 +54,11 @@ const LogIn = (props) => {
         </div>
     );
 };
+
+export function isLoggedIn()
+{
+    return localStorage.getItem("authenticated" || false);
+}
 
 
 export default LogIn;

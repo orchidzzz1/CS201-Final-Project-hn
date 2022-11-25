@@ -1,14 +1,19 @@
 package com.events.studentevents.dao;
 
+import java.sql.PreparedStatement;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.events.studentevents.model.User;
+import com.events.studentevents.model.Preference;
+import com.events.studentevents.model.PreferenceUser;
 
 
 //Implementation of UserDAO method
@@ -60,16 +65,38 @@ public class UserDAOImp implements UserDAO {
 	}
 
 	@Override
-	public int insertUser(User user) {
+	public int insertUser(PreferenceUser pUser) {
 		// TODO Auto-generated method stub
 		
 		try {
-			if (this.getByEmail(user.getEmail()) != null) {
-				return 0;
+			User u = this.getByEmail(pUser.getEmail());
+			//If a user corresponding to the provided email already exists, return 0 and do nothing
+			if (u != null) {
+				return u.getId();
 			}
-			template.update("INSERT INTO Users (email, password) VALUES (?, ?)", new Object[] {user.getEmail(), user.getPassword()});
+			
+			KeyHolder keys = new GeneratedKeyHolder();
+			//Insert user and return 1
+			template.update(connection -> {
+				PreparedStatement ps = connection.prepareStatement("INSERT INTO Users (email, password) VALUES (?, ?)", new String[] {"id"});
+				ps.setString(1, pUser.getEmail());
+				ps.setString(2, pUser.getPassword());
+				return ps;
+			}, keys);
+			
+			Number n = keys.getKey();
+			//template.update("INSERT INTO Users (email, password) VALUES (?, ?)", new Object[] {pUser.getEmail(), pUser.getPassword()});
+			
+			List<Preference> prefs = pUser.getPreferences();
+			
+			for (Preference p : prefs) {
+				
+				template.update("INSERT INTO Preferences (userId, preferenceId, alert) VALUES (?,?,?)", new Object[] {n.intValue(), p.getPid(), p.isAlert()});
+				
+			}
 			return 1;
 		} catch (Exception e) {
+			//Error occurred, return -1
 			return -1;
 		}
 	}

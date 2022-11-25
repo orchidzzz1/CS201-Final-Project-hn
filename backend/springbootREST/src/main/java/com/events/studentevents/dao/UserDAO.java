@@ -2,6 +2,7 @@ package com.events.studentevents.dao;
 
 import java.util.List;
 
+import com.events.studentevents.model.PreferenceUser;
 import com.events.studentevents.model.User;
 
 
@@ -16,6 +17,6 @@ public interface UserDAO {
 	
 	boolean authenticate(String email, String password);
 	
-	int insertUser(User user);
-
+	int insertUser(PreferenceUser user);
+	
 }

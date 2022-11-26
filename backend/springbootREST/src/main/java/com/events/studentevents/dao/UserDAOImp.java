@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import com.events.studentevents.model.User;
 import com.events.studentevents.model.Preference;
 import com.events.studentevents.model.PreferenceUser;
+import com.events.studentevents.model.Preferencetype;
 
 
 //Implementation of UserDAO method
@@ -64,6 +65,13 @@ public class UserDAOImp implements UserDAO {
 		return res != null;
 	}
 
+	
+	private Preferencetype getPreference(String name) {
+		
+		Preferencetype p = template.queryForObject("SELECT * FROM Preferencetype WHERE preferenceId=?", new BeanPropertyRowMapper<Preferencetype>(Preferencetype.class), new Object[] {name});
+		
+		return p;
+	}
 	@Override
 	public int insertUser(PreferenceUser pUser) {
 		// TODO Auto-generated method stub
@@ -78,20 +86,22 @@ public class UserDAOImp implements UserDAO {
 			KeyHolder keys = new GeneratedKeyHolder();
 			//Insert user and return 1
 			template.update(connection -> {
-				PreparedStatement ps = connection.prepareStatement("INSERT INTO Users (email, password) VALUES (?, ?)", new String[] {"id"});
+				PreparedStatement ps = connection.prepareStatement("INSERT INTO Users (email, password, displayName) VALUES (?, ?, ?)", new String[] {"id"});
 				ps.setString(1, pUser.getEmail());
 				ps.setString(2, pUser.getPassword());
+				ps.setString(3, pUser.getDisplayName());
 				return ps;
 			}, keys);
 			
 			Number n = keys.getKey();
 			//template.update("INSERT INTO Users (email, password) VALUES (?, ?)", new Object[] {pUser.getEmail(), pUser.getPassword()});
 			
-			List<Preference> prefs = pUser.getPreferences();
+			List<String> prefs = pUser.getPreferences();
 			
-			for (Preference p : prefs) {
+			for (String p : prefs) {
 				
-				template.update("INSERT INTO Preferences (userId, preferenceId, alert) VALUES (?,?,?)", new Object[] {n.intValue(), p.getPid(), p.isAlert()});
+				Preferencetype val = this.getPreference(p);
+				template.update("INSERT INTO Preferences (userId, preferenceId, alert) VALUES (?,?,?)", new Object[] {n.intValue(), val.getPreferenceId(), false});
 				
 			}
 			return 1;

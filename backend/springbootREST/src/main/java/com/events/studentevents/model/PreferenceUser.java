@@ -2,17 +2,25 @@ package com.events.studentevents.model;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PreferenceUser {
 	
 	private int id;
 	private String email;
 	private String password;
-	private List<Preference> preferences;
+	private String displayName;
+	private List<String> preferences;
 	
-	public List<Preference> getPreferences() {
+	public List<String> getPreferences() {
 		return preferences;
 	}
-	public void setPreferences(List<Preference> preferences) {
+	public void setPreferences(List<String> preferences) {
 		this.preferences = preferences;
 	}
 	public String getEmail() {
@@ -33,6 +41,12 @@ public class PreferenceUser {
 	}
 	public void setId(int id) {
 		this.id = id;
+	}
+	public String getDisplayName() {
+		return displayName;
+	}
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 	
 

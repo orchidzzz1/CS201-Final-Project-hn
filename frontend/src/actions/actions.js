@@ -1,4 +1,5 @@
 import { LOGIN } from '../constants/actionTypes';
+import { CREATE } from '../constants/actionTypes'; 
 
 import * as api from '../api/index.js';
 
@@ -16,18 +17,18 @@ export const actionLogIn = (formData, navigate) => async (dispatch) => {
 };
 
 
-// export const createPost = (post, history) => async (dispatch) => {
-//     try {
-//       dispatch({ type: START_LOADING });
-//       const { data } = await api.createPost(post);
+export const createPost = (post) => async (dispatch) => {
+    try {
+      //dispatch({ type: START_LOADING });
+      const { data } = await api.createPost(post);
   
-//       dispatch({ type: CREATE, payload: data });
+      dispatch({ type: CREATE, payload: data });
   
-//       history.push(`/posts/${data._id}`);
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   };
+      //history.push(`/posts/${data._id}`);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
 // export const rsvpPost = (id) => async (dispatch) => {
 //     const user = JSON.parse(localStorage.getItem('profile'));

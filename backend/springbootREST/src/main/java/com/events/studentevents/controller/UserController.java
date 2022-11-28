@@ -38,6 +38,7 @@ public class UserController {
 		
 	}
 	
+	//not safe -- should store id in session whenever user logs in or registers and not send id to front end
 	//This annotation means any GET requests to url-of-server/users/id will cause this 
 	//code to execute
 	@GetMapping("/api/users/{id}")

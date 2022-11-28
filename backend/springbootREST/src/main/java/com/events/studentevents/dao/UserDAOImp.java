@@ -88,6 +88,18 @@ public class UserDAOImp implements UserDAO {
 	}
 	
 	@Override
+	public void changePassword(int userId, String newPassword){
+		template.update(connection -> {
+			String sqlString = "UPDATE users user" 
+			+ " SET user.password = ?" 
+			+ " WHERE user.userId = ?";			
+			PreparedStatement ps = connection.prepareStatement(sqlString);
+			ps.setInt(1, userId);
+			ps.setString(2, preference);
+		});
+	}
+
+	@Override
 	public UserInfo getUser(int userId) {
 		//adapted from
 		//https://stackoverflow.com/questions/24221187/jdbctemplate-queryformap-for-retrieving-multiple-rows
@@ -128,7 +140,8 @@ public class UserDAOImp implements UserDAO {
 		template.update(connection -> {
 			String sqlString = "DELETE FROM preferences pref" 
 			+" WHERE pref.userId = ?"
-			+" AND pref.preferenceId = (SELECT preferenceId FROM preferencetypes types WHERE types.preferenceName = ?)";			PreparedStatement ps = connection.prepareStatement(sql, new String[] {"id"});
+			+" AND pref.preferenceId = (SELECT preferenceId FROM preferencetypes types WHERE types.preferenceName = ?)";
+			PreparedStatement ps = connection.prepareStatement(sqlString);
 			ps.setInt(1, userId);
 			ps.setString(2, preference);
 		});
@@ -139,6 +152,7 @@ public class UserDAOImp implements UserDAO {
 		template.update(connection -> {
 			String sqlString = "INSERT INTO preferences(userId, preferenceID, alert)"
 			+ " VALUES (?, (SELECT types.preferenceId FROM preferencetypes types WHERE types.preferenceName = ?), FALSE)";			
+			PreparedStatement ps = connection.prepareStatement(sqlString);
 			ps.setInt(1, userId);
 			ps.setString(2, preference);
 		});
@@ -150,6 +164,7 @@ public class UserDAOImp implements UserDAO {
 			String sqlString = "UPDATE preferences pref" 
 			+ " SET pref.alert = NOT pref.alert" 
 			+ " WHERE pref.userId = ? AND pref.preferenceId = (SELECT types.preferenceId FROM preferencetypes types WHERE types.preferenceName = ?)";
+			PreparedStatement ps = connection.prepareStatement(sqlString);
 			ps.setInt(1, userId);
 			ps.setString(2, preference);
 		});

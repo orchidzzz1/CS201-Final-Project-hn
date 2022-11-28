@@ -26,6 +26,14 @@ public interface UserDAO {
      */
 	int registerUser(UserInfo user);
 	
+
+	/*
+	 * Change password
+	 * Note: password requirements should be checked by front end
+	 */
+	public void changePassword(int userId, String newPassword);
+
+
 	/*
      * Remove a user's preference
      * @param userId: should be retrieved from front end in order to identify the user

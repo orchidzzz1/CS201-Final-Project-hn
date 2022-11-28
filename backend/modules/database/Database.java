@@ -124,7 +124,7 @@ public class Database{
             
             //insert to Preferences table
             String sqlString = "INSERT INTO preferences(userId, preferenceId, alert)"
-                            + " SELECT ?, (SELECT preferenceId FROM preferenceTypes pref WHERE pref.preferenceName = ?), FALSE";
+                            + " ?, (SELECT preferenceId FROM preferenceTypes pref WHERE pref.preferenceName = ?), FALSE";
             ps2 = conn.prepareStatement(sqlString);
             for(String pref : preferences){
                 ps2.setInt(1, userId);

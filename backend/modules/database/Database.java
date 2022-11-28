@@ -19,6 +19,13 @@ public class Database{
 
     public Database(){
         //set variables here if necessary
+    	//remember to add jdbc jar file to classpath if run on local machine
+        try{
+            //include jdbc in class path
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
     /*
      * Connect to the cloudsql database using Connector/J
@@ -111,7 +118,7 @@ public class Database{
             //get userId of newly inserted row
             ResultSet rs = ps.getGeneratedKeys();
             if(rs.next()){
-                userId = rs.getInt("userId");
+                userId = rs.getInt(1);
                 rs.close();
             }
             
@@ -130,7 +137,13 @@ public class Database{
 			try {
 				if (ps != null) {
 					ps.close();
-				}	
+				}
+				if (ps1 != null) {
+					ps1.close();
+				}
+				if (ps2 != null) {
+					ps2.close();
+				}
                 disconnect();	
 			} catch (SQLException sqle) {
 				System.out.println("Exception when finalizaing registration: " + sqle.getMessage());

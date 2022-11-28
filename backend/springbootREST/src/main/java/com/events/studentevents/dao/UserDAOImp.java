@@ -1,14 +1,20 @@
 package com.events.studentevents.dao;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+//import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+
 import com.events.studentevents.model.*;
 
 
@@ -21,21 +27,11 @@ public class UserDAOImp implements UserDAO {
 	@Autowired
 	JdbcTemplate template;
 
-	
-	// //Returns every user in the Users table.
-	// //Note the schema of the Users table MUST match the User class (name and type, BOTH) 
-	// @Override
-	// public List<User> getAll() {
-	// 	List<User> res = template.query("SELECT * FROM Users", new BeanPropertyRowMapper<User>(User.class));
-	// 	return res;
-	// }
-
-
 	@Override
 	public int authenticateUser(String email, String password) {
 		int userId = -1;
-		String sql = "SELECT * FROM Users WHERE email = ? AND password = ?";
-		Integer id = template.queryForObject(sql, new Object[] {email, password}, Integer.class);
+		String sql = "SELECT userId FROM Users WHERE email = ? AND password = ?";
+		Integer id = template.queryForObject(sql, Integer.class, new Object[] {email, password});
 		if(id != null){
 			userId = id; 
 		}
@@ -47,7 +43,7 @@ public class UserDAOImp implements UserDAO {
 	 */
 	protected boolean userExists(String email) {
 		String sql = "SELECT count(*) FROM Users WHERE email = ?";
-		int count = jdbcTemplate.queryForObject(sql, new Object[] { email }, Integer.class);
+		int count = template.queryForObject(sql, Integer.class, new Object[] { email });
 	
 		return count > 0;
 	}
@@ -71,14 +67,14 @@ public class UserDAOImp implements UserDAO {
 				return ps;
 			}, keys);
 			//update userId with the auto-generated id of the newly added user
-			userId = keys.getKey();
+			userId = (int)keys.getKey();
 			
 			//insert into preferences table
 			List<Preference> prefs = user.preferences;
 			for (Preference p : prefs) {
 				String sqlString = "INSERT INTO Preferences(userId, preferenceId, alert)"
-                            + " ?, (SELECT preferenceId FROM preferenceTypes pref WHERE pref.preferenceName = ?), FALSE";
-				template.update(sqlString, new Object[] {userId, p.pname});
+                            + " VALUES (?, (SELECT preferenceId FROM preferenceTypes pref WHERE pref.preferenceName = ?), FALSE)";
+				template.update(sqlString, new Object[] {userId, p.preferenceName});
 			}
 		} catch (Exception e) {
 			//Error occurred, return -1
@@ -89,14 +85,10 @@ public class UserDAOImp implements UserDAO {
 	
 	@Override
 	public void changePassword(int userId, String newPassword){
-		template.update(connection -> {
-			String sqlString = "UPDATE users user" 
-			+ " SET user.password = ?" 
-			+ " WHERE user.userId = ?";			
-			PreparedStatement ps = connection.prepareStatement(sqlString);
-			ps.setInt(1, userId);
-			ps.setString(2, preference);
-		});
+		String sqlString = "UPDATE Users user" 
+				+ " SET user.password = ?" 
+				+ " WHERE user.userId = ?";	
+		template.update(sqlString, new Object[] {newPassword, userId} );
 	}
 
 	@Override
@@ -105,19 +97,20 @@ public class UserDAOImp implements UserDAO {
 		//https://stackoverflow.com/questions/24221187/jdbctemplate-queryformap-for-retrieving-multiple-rows
 		try {
 			String sqlString = "SELECT user.email, user.displayName, types.preferenceName, pref.alert"
-			+" FROM users user" 
-			+" INNER JOIN preferences pref ON user.userId = pref.userId" 
-			+" INNER JOIN preferencetypes types ON pref.preferenceId = types.preferenceId" 
-			+" WHERE userId = ?";
+			+" FROM Users user" 
+			+" LEFT JOIN Preferences pref ON user.userId = pref.userId" 
+			+" LEFT JOIN Preferencetypes types ON pref.preferenceId = types.preferenceId" 
+			+" WHERE user.userId = ?";
 			UserInfo user = template.query(sqlString, new ResultSetExtractor<UserInfo>(){
 				@Override
 				public UserInfo extractData(ResultSet rs) throws SQLException,DataAccessException {
+					
 					if(rs.next()){
-						user = new UserInfo();
+						UserInfo user = new UserInfo();
 						//get user's display name and email
 						user.displayName = rs.getString("displayName");
 						user.email = rs.getString("email");
-						
+						user.preferences = new ArrayList<Preference>();
 						//get user's preferences and notification settings
 						do{
 							Preference pref = new Preference();
@@ -129,7 +122,8 @@ public class UserDAOImp implements UserDAO {
 					}
 					return null;
 				}
-			});
+			}, new Object[] {userId});
+			return user;
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
@@ -137,43 +131,31 @@ public class UserDAOImp implements UserDAO {
 
 	@Override
 	public void removePreferenceFromUser(int userId, String preference){
-		template.update(connection -> {
-			String sqlString = "DELETE FROM preferences pref" 
-			+" WHERE pref.userId = ?"
-			+" AND pref.preferenceId = (SELECT preferenceId FROM preferencetypes types WHERE types.preferenceName = ?)";
-			PreparedStatement ps = connection.prepareStatement(sqlString);
-			ps.setInt(1, userId);
-			ps.setString(2, preference);
-		});
+		String sqlString = "DELETE FROM Preferences pref" 
+				+" WHERE pref.userId = ?"
+				+" AND pref.preferenceId = (SELECT preferenceId FROM Preferencetypes types WHERE types.preferenceName = ?)";
+		template.update(sqlString, new Object[] {userId, preference} );
 	}
 
 	@Override
 	public void addPreferenceToUser(int userId, String preference){
-		template.update(connection -> {
-			String sqlString = "INSERT INTO preferences(userId, preferenceID, alert)"
-			+ " VALUES (?, (SELECT types.preferenceId FROM preferencetypes types WHERE types.preferenceName = ?), FALSE)";			
-			PreparedStatement ps = connection.prepareStatement(sqlString);
-			ps.setInt(1, userId);
-			ps.setString(2, preference);
-		});
+		String sqlString = "INSERT INTO Preferences(userId, preferenceID, alert)"
+		+ " VALUES (?, (SELECT types.preferenceId FROM Preferencetypes types WHERE types.preferenceName = ?), FALSE)";
+		template.update(sqlString, new Object[] {userId, preference} );
 	}
 
 	@Override
 	public void modifyNotificationSetting(int userId, String preference){
-		template.update(connection -> {
-			String sqlString = "UPDATE preferences pref" 
-			+ " SET pref.alert = NOT pref.alert" 
-			+ " WHERE pref.userId = ? AND pref.preferenceId = (SELECT types.preferenceId FROM preferencetypes types WHERE types.preferenceName = ?)";
-			PreparedStatement ps = connection.prepareStatement(sqlString);
-			ps.setInt(1, userId);
-			ps.setString(2, preference);
-		});
+		String sqlString = "UPDATE Preferences pref" 
+				+ " SET pref.alert = NOT pref.alert" 
+				+ " WHERE pref.userId = ? AND pref.preferenceId = (SELECT types.preferenceId FROM Preferencetypes types WHERE types.preferenceName = ?)";
+		template.update(sqlString, new Object[] {userId, preference} );
 	}
 	
 	@Override
 	public List<String> getPreferenceTypes(){
-		String sqlString = "SELECT preferenceName FROM preferencetypes";
-		List<String>preferenceTypes = template.queryForList(sqlString, String.class);
+		String sqlString = "SELECT preferenceName FROM Preferencetypes";
+		List<String>preferenceTypes =template.queryForList(sqlString, String.class);
 		return preferenceTypes;
 	}
 

@@ -19,8 +19,9 @@ import lombok.NoArgsConstructor;
 public class User {
 	public int userId;
 	public String email;
-	//SHOULD NOT store password because this model is used to be sent to front end
+	//Should not return password to frontend
 	//and password can only be changed through a DAO method
+	public String password;
 	public String displayName;
 
 }

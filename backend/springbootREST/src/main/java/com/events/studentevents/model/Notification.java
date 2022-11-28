@@ -3,11 +3,14 @@ package com.events.studentevents.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.security.Timestamp;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructorimport java.security.Timestamp;
-/* Model for notifcations for all rsvp'd events that will start in an hour or less
+@NoArgsConstructor
+
+/* 
+ * Model for notifcations for all rsvp'd events that will start in an hour or less
  * For front end to display to user at page load
 */
 public class Notification {

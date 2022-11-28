@@ -2,6 +2,8 @@ package com.events.studentevents.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -13,5 +15,5 @@ import java.util.List;
  * For front end to dispay on user's page
  */
 public class UserInfo extends User{
-	public List<Preference> preferences = new List<Preference>();
+	public ArrayList<Preference> preferences;
 }

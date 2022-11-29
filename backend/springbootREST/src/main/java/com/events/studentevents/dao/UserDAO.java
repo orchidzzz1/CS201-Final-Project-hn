@@ -18,7 +18,7 @@ public interface UserDAO {
      * @return userId if registered successfully in order to be stored in session;
 	 *  -1 if failed to add user
      */
-	int registerUser(UserInfo user);
+	String registerUser(UserInfo user);
 	
 
 	/*

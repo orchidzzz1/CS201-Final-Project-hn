@@ -16,4 +16,5 @@ import java.util.List;
  */
 public class UserInfo extends User{
 	public ArrayList<Preference> preferences;
+	
 }

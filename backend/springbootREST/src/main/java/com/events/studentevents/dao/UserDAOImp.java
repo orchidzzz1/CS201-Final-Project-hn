@@ -5,6 +5,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -14,7 +17,6 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-
 import com.events.studentevents.model.*;
 
 
@@ -47,13 +49,15 @@ public class UserDAOImp implements UserDAO {
 	
 		return count > 0;
 	}
+	
+	//TODO: Weird error, returns -1?
 
 	@Override
-	public int registerUser(UserInfo user) {
+	public String registerUser(UserInfo user) {
 		int userId = -1;
 		try {
 			if(userExists(user.email)){
-				return userId;
+				return String.valueOf(userId);
 			}
 			
 			KeyHolder keys = new GeneratedKeyHolder();
@@ -67,20 +71,23 @@ public class UserDAOImp implements UserDAO {
 				return ps;
 			}, keys);
 			//update userId with the auto-generated id of the newly added user
-			userId = (int)keys.getKey();
+			
+			Number n = keys.getKey();
+			
+			userId = n.intValue();
 			
 			//insert into preferences table
 			List<Preference> prefs = user.preferences;
 			for (Preference p : prefs) {
 				String sqlString = "INSERT INTO Preferences(userId, preferenceId, alert)"
-                            + " VALUES (?, (SELECT preferenceId FROM preferenceTypes pref WHERE pref.preferenceName = ?), FALSE)";
+                            + " VALUES (?, (SELECT preferenceId FROM Preferencetypes pref WHERE pref.preferenceName = ?), FALSE)";
 				template.update(sqlString, new Object[] {userId, p.preferenceName});
 			}
 		} catch (Exception e) {
 			//Error occurred, return -1
-			return -1;
+			return "ERROR: " + e.getLocalizedMessage() + " " + e.getStackTrace().toString();
 		}
-		return userId;
+		return "Status: " + String.valueOf(userId);
 	}
 	
 	@Override
@@ -96,7 +103,7 @@ public class UserDAOImp implements UserDAO {
 		//adapted from
 		//https://stackoverflow.com/questions/24221187/jdbctemplate-queryformap-for-retrieving-multiple-rows
 		try {
-			String sqlString = "SELECT user.email, user.displayName, types.preferenceName, pref.alert"
+			String sqlString = "SELECT user.email, user.displayName, user.userId, types.preferenceName, pref.alert"
 			+" FROM Users user" 
 			+" LEFT JOIN Preferences pref ON user.userId = pref.userId" 
 			+" LEFT JOIN Preferencetypes types ON pref.preferenceId = types.preferenceId" 
@@ -111,6 +118,7 @@ public class UserDAOImp implements UserDAO {
 						user.displayName = rs.getString("displayName");
 						user.email = rs.getString("email");
 						user.preferences = new ArrayList<Preference>();
+						user.userId = rs.getInt("userId");
 						//get user's preferences and notification settings
 						do{
 							Preference pref = new Preference();
@@ -139,8 +147,11 @@ public class UserDAOImp implements UserDAO {
 
 	@Override
 	public void addPreferenceToUser(int userId, String preference){
+		
+		Logger l = LoggerFactory.getLogger(getClass());
+		l.info(preference);
 		String sqlString = "INSERT INTO Preferences(userId, preferenceID, alert)"
-		+ " VALUES (?, (SELECT types.preferenceId FROM Preferencetypes types WHERE types.preferenceName = ?), FALSE)";
+		+ " VALUES (?, (SELECT preferenceId FROM Preferencetypes types WHERE preferenceName = ?), FALSE)";
 		template.update(sqlString, new Object[] {userId, preference} );
 	}
 
@@ -152,10 +163,13 @@ public class UserDAOImp implements UserDAO {
 		template.update(sqlString, new Object[] {userId, preference} );
 	}
 	
+	
+	//Returns only a single preferencetype currently TODO: Debug so all are returned
+	
 	@Override
 	public List<String> getPreferenceTypes(){
 		String sqlString = "SELECT preferenceName FROM Preferencetypes";
-		List<String>preferenceTypes =template.queryForList(sqlString, String.class);
+		List<String> preferenceTypes =template.queryForList(sqlString, String.class);
 		return preferenceTypes;
 	}
 

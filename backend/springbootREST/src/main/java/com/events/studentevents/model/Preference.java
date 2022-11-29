@@ -17,5 +17,17 @@ public class Preference {
 	//user can change this setting in user's page
 	public boolean alert = false;
 
+	
+	public Preference(String s) {
+		this.preferenceName = s;
+	}
+	
+//	public Preference() {
+//	}
+//	
+//	public Preference(String s, boolean a) {
+//		this.alert = a;
+//		this.preferenceName = s;
+//	}
 
 }

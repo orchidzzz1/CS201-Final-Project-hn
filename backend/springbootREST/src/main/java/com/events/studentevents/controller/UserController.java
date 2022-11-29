@@ -35,35 +35,32 @@ public class UserController {
 	}
 	
 	//modify later
-	@GetMapping("/api/addPreferenceToUser/{preferenceName}")
+	@GetMapping("/api/addPreferenceToUser/{preferenceName}/{id}")
 	@ResponseBody
-	public void addPreferenceToUser(@PathVariable("preferenceName") String preferenceName, HttpServletResponse response) {
+	public void addPreferenceToUser(@PathVariable("preferenceName") String preferenceName, @PathVariable("id") int id, HttpServletResponse response) {
 		response.addHeader("Access-Control-Allow-Origin", "*");
 		//get userId from session
-		int userId = 1;
-		uDao.addPreferenceToUser(userId, preferenceName);
+		uDao.addPreferenceToUser(id, preferenceName);
 		//redirect to api/user to show updated changes?
 	}
 	
 	// modify later
-	@GetMapping("/api/removePreferenceFromUser/{preferenceName}")
+	@GetMapping("/api/removePreferenceFromUser/{preferenceName}/{id}")
 	@ResponseBody
-	public void removePreferenceFromUser(@PathVariable("preferenceName") String preferenceName, HttpServletResponse response) {
+	public void removePreferenceFromUser(@PathVariable("preferenceName") String preferenceName, @PathVariable("id") int id, HttpServletResponse response) {
 		response.addHeader("Access-Control-Allow-Origin", "*");
 		// get userId from session
-		int userId = 1;
-		uDao.removePreferenceFromUser(userId, preferenceName);
+		uDao.removePreferenceFromUser(id, preferenceName);
 		// redirect to api/user to show updated changes?
 	}
 	
 	//modify later
-	@GetMapping("/api/modifyNotificationSetting/{preferenceName}")
+	@GetMapping("/api/modifyNotificationSetting/{preferenceName}/{id}")
 	@ResponseBody
-	public void modifyNotificationSetting(@PathVariable("preferenceName") String preferenceName, HttpServletResponse response) {
+	public void modifyNotificationSetting(@PathVariable("preferenceName") String preferenceName, @PathVariable("id") int id, HttpServletResponse response) {
 		response.addHeader("Access-Control-Allow-Origin", "*");
 		// get userId from session
-		int userId = 1;
-		uDao.modifyNotificationSetting(userId, preferenceName);
+		uDao.modifyNotificationSetting(id, preferenceName);
 		// redirect to api/user to show updated changes?
 	}
 	
@@ -73,11 +70,10 @@ public class UserController {
 	/*
 	 * Get user's information including email, displayName, and list of {preferenceName, alert}
 	 */
-	@GetMapping("/api/user")
+	@GetMapping("/api/user/{id}")
 	@ResponseBody
-	public UserInfo getUser(HttpServletResponse response) {
+	public UserInfo getUser(@PathVariable("id") int id, HttpServletResponse response) {
 		//should get id from session
-		int id = 2; //change this later
 		response.addHeader("Access-Control-Allow-Origin", "*");
 		UserInfo user =  uDao.getUser(id);
 		return user;
@@ -109,18 +105,18 @@ public class UserController {
 	 */
 	@PostMapping("/api/registerUser")
 	@ResponseBody
-	public int insertUser(@RequestBody UserInfo user, HttpServletResponse response) {
+	public String insertUser(@RequestBody UserInfo user, HttpServletResponse response) {
 		response.addHeader("Access-Control-Allow-Origin", "*");
 		try {
 			//should store user id returned in session
-			int userId = uDao.registerUser(user);
-			if (userId > 0) {
-				return 1;
-			}
+			return uDao.registerUser(user);
+//			if (userId > 0) {
+//				return "1";
+//			}
 			
-			return -1;
+			//return "ERROR";
 		} catch (EmptyResultDataAccessException e) {
-			return -1;
+			return "ERRORRR: " + e.getLocalizedMessage();
 		}
 	}
 

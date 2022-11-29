@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 
@@ -15,6 +15,7 @@ const App = () => {
     // const toggleForm =(formName) => {
     //     setCurrentID(formName);
     // }
+
 
     return (
         // <div className="App">
@@ -34,7 +35,7 @@ const App = () => {
                     <Route path="/register" exact element={<Register/ >} />
                     <Route path="/createpost" exact element={<CreatePost/ >} />
                     <Route path="/dashboard" exact element={<Dashboard/ >} />
-                    <Route path="/post" exact element={<PostPage/ >} />
+                    {/* <Route path="/post" exact element={<PostPage/ >} /> */}
                 </Routes>
             </BrowserRouter>
         </div>

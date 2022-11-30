@@ -77,7 +77,7 @@ public class UserController {
 	@ResponseBody
 	public UserInfo getUser(HttpServletResponse response) {
 		//should get id from session
-		int id = 2; //change this later
+		int id = 1; //change this later
 		response.addHeader("Access-Control-Allow-Origin", "*");
 		UserInfo user =  uDao.getUser(id);
 		return user;
@@ -109,7 +109,7 @@ public class UserController {
 	 */
 	@PostMapping("/api/registerUser")
 	@ResponseBody
-	public int insertUser(@RequestBody UserInfo user, HttpServletResponse response) {
+	public int registerUser(@RequestBody UserInfo user, HttpServletResponse response) {
 		response.addHeader("Access-Control-Allow-Origin", "*");
 		try {
 			//should store user id returned in session

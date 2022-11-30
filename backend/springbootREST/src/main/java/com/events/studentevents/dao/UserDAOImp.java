@@ -73,7 +73,7 @@ public class UserDAOImp implements UserDAO {
 			List<Preference> prefs = user.preferences;
 			for (Preference p : prefs) {
 				String sqlString = "INSERT INTO Preferences(userId, preferenceId, alert)"
-                            + " VALUES (?, (SELECT preferenceId FROM preferenceTypes pref WHERE pref.preferenceName = ?), FALSE)";
+                            + " VALUES (?, (SELECT preferenceId FROM Preferencetypes pref WHERE pref.preferenceName = ?), FALSE)";
 				template.update(sqlString, new Object[] {userId, p.preferenceName});
 			}
 		} catch (Exception e) {
@@ -155,7 +155,7 @@ public class UserDAOImp implements UserDAO {
 	@Override
 	public List<String> getPreferenceTypes(){
 		String sqlString = "SELECT preferenceName FROM Preferencetypes";
-		List<String>preferenceTypes =template.queryForList(sqlString, String.class);
+		List<String>preferenceTypes = template.queryForList(sqlString, String.class);
 		return preferenceTypes;
 	}
 

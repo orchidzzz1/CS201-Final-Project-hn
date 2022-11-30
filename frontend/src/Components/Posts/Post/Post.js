@@ -7,24 +7,26 @@ import CardContent from '@mui/material/CardContent';
 
 
 
-const Post = () => {
-    // //populate the form with an API call
+const Post = (post) => {
+    //populate the form with an API call
     // const posts = useSelector((state) => state.posts);
-
 
     // hardcoded just for testing 
     const postData = {eventname: 'Basketball', categories: 'Sports, Gym', description: 'Redekopp broke our ankles last time', startTime: '12:00 PM', endTime: '4:00 PM', location: 'USC Lyon Center'};
+    let s = JSON.stringify(post);
+    let p = JSON.parse(s);
 
+    console.log(p);  
     return (
         <Card raised>
             <CardActionArea>
                 <CardContent>
-                    <h1>{postData.eventname}</h1>
-                    <p>Categories: {postData.categories}</p>
-                    <p>Description: {postData.description}</p>
-                    <p>Start: {postData.startTime}</p>
-                    <p>End: {postData.endTime}</p>
-                    <p>Location: {postData.location}</p>
+                    <h1>{post['post'].name}</h1>
+                    <p>Categories: {post['post'].activityType}</p>
+                    <p>Description: {post['post'].description}</p>
+                    <p>Start: {post['post'].eventDateTime}</p>
+                    {/*<p>End: {postData.endTime}</p>*/}
+                    <p>Location: {post['post'].eventLocation}</p>
                 </CardContent>
             </CardActionArea>
         </Card>

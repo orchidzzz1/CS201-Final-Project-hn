@@ -20,8 +20,8 @@ export const CuratedDashboard = () => {
     localStorage.setItem('view', 1);
     
     if (authenticated === -1 || authenticated === null) {
-      console.log("not auth")
-      navigate('/')
+      console.log("not auth");
+      navigate('/'); 
     }
     dispatch(actionFetchCurated);    
   }, [location, authenticated, navigate, dispatch]);

@@ -1,6 +1,7 @@
 import React, { useState} from 'react';
 import { useDispatch } from "react-redux";
 import { createPost } from "../../actions/actions";
+import { useNavigate } from "react-router-dom";
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import NavBar from '../Dashboard/NavBar/NavBar';
@@ -11,8 +12,9 @@ import NavBar from '../Dashboard/NavBar/NavBar';
 const CreatePost = () => {
     const animatedComponents = makeAnimated();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
-    const [postData, setPostData] = useState({eventname: '', tags: [], description: '', date: '',  startTime: '', endTime: ' ', location:'', });
+    const [postData, setPostData] = useState({title: '', description: '', preferenceCategory: '', location: '',  eventDateTime: '', createdUserId:1});
     const [errorMessage, setErrorMessage] = useState('');
 
     const options = [
@@ -28,12 +30,6 @@ const CreatePost = () => {
         { value: 'Sunday', label: 'Sunday' }
     ]
 
-    const handleChangePref = (e) => {
-        const map = e.map(option =>
-            option.value
-        )
-        setPostData({...postData, tags: map})
-    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -43,9 +39,14 @@ const CreatePost = () => {
         }
         else 
         {
-            dispatch(createPost(postData));
+            dispatch(createPost(postData, navigate));
+            navigate('/dashboard');
         }
     };
+
+    const handleOption = (e) => {
+        setPostData({...postData, preferenceCategory:e.value})
+    }
     
     return (
         <div>
@@ -55,17 +56,17 @@ const CreatePost = () => {
                 {errorMessage && <div className="error-message"> {errorMessage} </div>}
                 <form className = "createpost-form" onSubmit={handleSubmit}>
                     <label htmlFor="eventName">Event Name </label>
-                    <input value={postData.eventname} onChange={(e) => setPostData({ ...postData, eventname: e.target.value })} type="eventname" placeholder="Pick-Up Basketball" id="eventname" name="eventname" required/>
+                    <input value={postData.eventname} onChange={(e) => setPostData({ ...postData, title: e.target.value })} type="eventname" placeholder="Pick-Up Basketball" id="eventname" name="eventname" required/>
                     <label htmlFor="Categories"> Categories </label>
-                    <Select styles={{ control: (baseStyles, state) => ({ ...baseStyles, width: '1420px', borderRadius: 10, }), }} className="register" name ="preferences" onChange={handleChangePref} options={options} closeMenuOnSelect={false} components={animatedComponents} isMulti /> 
+                    <Select onChange={e => handleOption(e)} styles={{ control: (baseStyles, state) => ({ ...baseStyles, width: '1420px', borderRadius: 10, }), }}  className="register" options={options} closeMenuOnSelect={false} components={animatedComponents}  />
                     <label htmlFor="Description"> Description </label>
                     <input value={postData.description} onChange={(e) => setPostData({ ...postData, description: e.target.value })} type="description" placeholder="we lowk suck, so go easy" id="description" name="description" required/>
                     <label htmlFor="Date">Date </label>
-                    <input value = {postData.date} onChange={(e) => setPostData({ ...postData, date: e.target.value })} type ="date" id="date" name="date" required/>
+                    <input value = {postData.date} type ="date" id="date" name="date" required/>
                     <label htmlFor="Start Time">Start Time </label>
-                    <input value = {postData.startTime} onChange={(e) => setPostData({ ...postData, startTime: e.target.value })} type ="time" id="starttime" name="starttime" required/>
-                    <label htmlFor="End Time">End Time </label>
-                    <input value = {postData.endTime} onChange={(e) => setPostData({ ...postData, endTime: e.target.value })} type ="time" id="endtime" name="endtime" required/>
+                    <input value = {postData.startTime} onChange={(e) => setPostData({ ...postData, eventDateTime: e.target.value })} type ="description" id="starttime" name="starttime" required/>
+                    {/*<label htmlFor="End Time">End Time </label>
+                    <input value = {postData.endTime} type ="time" id="endtime" name="endtime" required/>*/}
                     <label htmlFor="Location">Location </label>
                     <input value={postData.location} onChange={(e) => setPostData({ ...postData, location: e.target.value })} type="location" placeholder="USC Lyon Center" id="location" name="location" required/>
                     <button type="submit">Submit</button>

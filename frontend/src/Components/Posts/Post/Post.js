@@ -7,6 +7,7 @@ import CardContent from '@mui/material/CardContent';
 
 
 
+
 const Post = (post) => {
     //populate the form with an API call
     // const posts = useSelector((state) => state.posts);
@@ -17,6 +18,7 @@ const Post = (post) => {
     let p = JSON.parse(s);
 
     console.log(p);  
+
     return (
         <Card raised>
             <CardActionArea>
@@ -27,6 +29,7 @@ const Post = (post) => {
                     <p>Start: {post['post'].eventDateTime}</p>
                     {/*<p>End: {postData.endTime}</p>*/}
                     <p>Location: {post['post'].eventLocation}</p>
+
                 </CardContent>
             </CardActionArea>
         </Card>

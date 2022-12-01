@@ -2,6 +2,7 @@ import React, { useState} from 'react';
 import { useDispatch } from "react-redux";
 import { createPost } from "../../actions/actions";
 import { useNavigate } from "react-router-dom";
+
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import NavBar from '../Dashboard/NavBar/NavBar';
@@ -15,6 +16,7 @@ const CreatePost = () => {
     const navigate = useNavigate();
 
     const [postData, setPostData] = useState({title: '', description: '', preferenceCategory: '', location: '',  eventDateTime: '', createdUserId:1});
+
     const [errorMessage, setErrorMessage] = useState('');
 
     const options = [
@@ -67,6 +69,7 @@ const CreatePost = () => {
                     <input value = {postData.startTime} onChange={(e) => setPostData({ ...postData, eventDateTime: e.target.value })} type ="description" id="starttime" name="starttime" required/>
                     {/*<label htmlFor="End Time">End Time </label>
                     <input value = {postData.endTime} type ="time" id="endtime" name="endtime" required/>*/}
+
                     <label htmlFor="Location">Location </label>
                     <input value={postData.location} onChange={(e) => setPostData({ ...postData, location: e.target.value })} type="location" placeholder="USC Lyon Center" id="location" name="location" required/>
                     <button type="submit">Submit</button>

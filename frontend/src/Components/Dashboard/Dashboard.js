@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Container, Grid } from '@mui/material';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { styled } from '@mui/material/styles';
 
@@ -27,6 +28,7 @@ const Dashboard = () => {
     state.postReducer
   ));
 
+
   useEffect(() => {
     setUser(JSON.parse(localStorage.getItem('profile')))
     localStorage.setItem('view', 0);
@@ -35,7 +37,9 @@ const Dashboard = () => {
       console.log("not auth")
       navigate('/')
     }
+
     dispatch(actionFetchPosts());    
+
   }, [location, authenticated, navigate, dispatch]);
 
   /*
@@ -64,11 +68,13 @@ const Dashboard = () => {
   */
 
   return (
+
       <Container maxWidth="xl">
           <NavBar/>
             <div style = {{position:'absolute', top:0, width: 1380}}>
               <h1 style={{marginTop: 75, textAlign: "left"}}>All Events</h1>
               <Container style={{marginTop: 50, marginBottom:50}} maxWidth="xl">
+
                 <GridMainContainer container spacing={2} columns={4}>
                   {posts?.map((post) => (
                     <Grid item lg={1}>
@@ -76,6 +82,7 @@ const Dashboard = () => {
                     </Grid>
                   ))}
                 </GridMainContainer>
+
               </Container>
           </div>
       </Container>

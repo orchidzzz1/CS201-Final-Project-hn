@@ -22,6 +22,7 @@ export const CuratedDashboard = () => {
     if (authenticated === -1 || authenticated === null) {
       console.log("not auth");
       navigate('/'); 
+
     }
     dispatch(actionFetchCurated);    
   }, [location, authenticated, navigate, dispatch]);

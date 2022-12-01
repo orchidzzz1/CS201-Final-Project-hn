@@ -17,9 +17,8 @@ const GridMainContainer = styled(Grid)(({ theme }) => ({
 
 const Dashboard = () => {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('profile')));
-  
 
-  const authenticated = user?.authenticated
+  const displayName = user?.displayName
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -33,14 +32,14 @@ const Dashboard = () => {
     setUser(JSON.parse(localStorage.getItem('profile')))
     localStorage.setItem('view', 0);
     
-    if (authenticated === -1 || authenticated === null) {
+    if (displayName === -1 || displayName === null || displayName=== "-1") {
       console.log("not auth")
       navigate('/')
     }
 
     dispatch(actionFetchPosts());    
 
-  }, [location, authenticated, navigate, dispatch]);
+  }, [location, displayName, navigate, dispatch]);
 
   /*
   var posts = 
@@ -68,7 +67,6 @@ const Dashboard = () => {
   */
 
   return (
-
       <Container maxWidth="xl">
           <NavBar/>
             <div style = {{position:'absolute', top:0, width: 1380}}>

@@ -83,7 +83,7 @@ const Register = () => {
                 
                 <label htmlFor="confirmpassword">Confirm Password</label>
                 <input value={confirmpass} onChange={(e) => setConfirmPass(e.target.value)} type="password" placeholder="Confirm Password" id="confirmpassword" name="confirmpassword" />
-                <Select  className="register" name ="preferences" onChange={handleChangePref} options={options} closeMenuOnSelect={false} components={animatedComponents} isMulti /> 
+                <Select  styles={{ control: (baseStyles, state) => ({ ...baseStyles, width: '1420px', borderRadius: 10, }), }} className="register" name ="preferences" onChange={handleChangePref} options={options} closeMenuOnSelect={false} components={animatedComponents} isMulti /> 
                 <button>Register</button> 
             </form>
             <Link to="/"> 

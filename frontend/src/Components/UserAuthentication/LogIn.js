@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 
 import { actionLogIn } from '../../actions/actions';
 
-const initialState = {email: '', password: '', authenticated: -1, preferences: []};
+const initialState = {email: '', password: '', displayName: -1, preferences: []};
 
 const LogIn = (props) => {
    
@@ -17,11 +17,12 @@ const LogIn = (props) => {
     const location = useLocation();
 
     useEffect(() => {
-        if(JSON.parse(localStorage.getItem('profile'))?.authenticated === -1) {
+        if(JSON.parse(localStorage.getItem('profile'))?.displayName === -1) {
+            console.log("here");
             localStorage.removeItem('profile')
             setErrorMessage('Invalid Credentials')
         }
-        else if(JSON.parse(localStorage.getItem('profile'))?.authenticated > 1) {
+        else if(JSON.parse(localStorage.getItem('profile'))?.displayName > 1) {
             navigate('/dashboard')
         }
         
@@ -38,7 +39,7 @@ const LogIn = (props) => {
             setErrorMessage('Please enter a USC email');
         }
         else {
-            localStorage.setItem('profile', JSON.stringify({...form, authenticated: JSON.parse(localStorage.getItem('profile'))?.authenticated}))
+            localStorage.setItem('profile', JSON.stringify({...form, displayName: JSON.parse(localStorage.getItem('profile'))?.displayName}))
             dispatch(actionLogIn(form, navigate));
         }
     };
@@ -48,7 +49,7 @@ const LogIn = (props) => {
      
         <div className = "userAuthentication-container">
             <h2> Log In </h2>
-            {errorMessage && <div className="error-message"> {errorMessage} </div>}
+            <div className="error-message"> {errorMessage} </div>
             <form className = "login-form" onSubmit={handleSubmit}>
                 <label htmlFor="email">USC Email </label>
                 <input onChange={handleChange} type="email" placeholder="tommytrojan@usc.edu" id="email" name="email" />

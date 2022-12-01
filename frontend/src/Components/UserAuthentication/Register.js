@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 
-const initialState = {email: '', password: '', authenticated: -1, preferences: []};
+const initialState = {email: '', password: '', displayName: -1, preferences: []};
 
 const Register = () => {
     const navigate = useNavigate();
@@ -40,11 +40,11 @@ const Register = () => {
 
     useEffect(() => {
         console.log(form);
-        if(JSON.parse(localStorage.getItem('profile'))?.authenticated === -1) {
+        if(JSON.parse(localStorage.getItem('profile'))?.displayName === -1) {
             localStorage.removeItem('profile')
             setErrorMessage('User already exists')
         }
-        else if(JSON.parse(localStorage.getItem('profile'))?.authenticated > -1) {
+        else if(JSON.parse(localStorage.getItem('profile'))?.displayName > -1) {
             navigate('/dashboard')
         }
         
@@ -83,7 +83,7 @@ const Register = () => {
                 
                 <label htmlFor="confirmpassword">Confirm Password</label>
                 <input value={confirmpass} onChange={(e) => setConfirmPass(e.target.value)} type="password" placeholder="Confirm Password" id="confirmpassword" name="confirmpassword" />
-                <Select className="register" name ="preferences" onChange={handleChangePref} options={options} closeMenuOnSelect={false} components={animatedComponents} isMulti /> 
+                <Select  className="register" name ="preferences" onChange={handleChangePref} options={options} closeMenuOnSelect={false} components={animatedComponents} isMulti /> 
                 <button>Register</button> 
             </form>
             <Link to="/"> 

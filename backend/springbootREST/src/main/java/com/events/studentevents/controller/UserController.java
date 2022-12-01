@@ -1,14 +1,14 @@
 package com.events.studentevents.controller;
 
+import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+//import org.springframework.web.bind.annotation.PostMapping;
+//import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.events.studentevents.dao.UserDAO;
@@ -34,7 +34,7 @@ public class UserController {
 		return uDao.getPreferenceTypes();
 	}
 	
-	//modify later
+
 	@GetMapping("/api/addPreferenceToUser/{preferenceName}/{id}")
 	@ResponseBody
 	public void addPreferenceToUser(@PathVariable("preferenceName") String preferenceName, @PathVariable("id") int id, HttpServletResponse response) {
@@ -44,7 +44,7 @@ public class UserController {
 		//redirect to api/user to show updated changes?
 	}
 	
-	// modify later
+
 	@GetMapping("/api/removePreferenceFromUser/{preferenceName}/{id}")
 	@ResponseBody
 	public void removePreferenceFromUser(@PathVariable("preferenceName") String preferenceName, @PathVariable("id") int id, HttpServletResponse response) {
@@ -54,7 +54,7 @@ public class UserController {
 		// redirect to api/user to show updated changes?
 	}
 	
-	//modify later
+
 	@GetMapping("/api/modifyNotificationSetting/{preferenceName}/{id}")
 	@ResponseBody
 	public void modifyNotificationSetting(@PathVariable("preferenceName") String preferenceName, @PathVariable("id") int id, HttpServletResponse response) {
@@ -64,9 +64,7 @@ public class UserController {
 		// redirect to api/user to show updated changes?
 	}
 	
-	//not safe -- should store id in session whenever user logs in or registers and not send id to front end
-	//This annotation means any GET requests to url-of-server/users/id will cause this 
-	//code to execute
+
 	/*
 	 * Get user's information including email, displayName, and list of {preferenceName, alert}
 	 */
@@ -80,7 +78,7 @@ public class UserController {
 	}
 	
 	/*
-	 * Send back 1 to front end if authentication is successful; -1 if not
+	 * Send back userId to front end if authentication is successful; -1 if not
 	 */
 	@GetMapping("/api/authenticate/{email}/{password}")
 	@ResponseBody
@@ -101,23 +99,77 @@ public class UserController {
 
 	//PostMapping is another annotation option for any POST requests
 	/*
-	 * Send back 1 to front end if registration is successful; -1 if not
+	 * Send back userId to front end if registration is successful; -1 if not
 	 */
-	@PostMapping("/api/registerUser")
+	@GetMapping("/api/registerUser/{email}/{password}/{displayName}/{preferences}")
 	@ResponseBody
-	public String insertUser(@RequestBody UserInfo user, HttpServletResponse response) {
+	public int insertUser(@PathVariable("email") String email, @PathVariable("password") String password, 
+			@PathVariable("displayName") String displayName, @PathVariable("preferences") ArrayList<String> prefs, HttpServletResponse response) {
 		response.addHeader("Access-Control-Allow-Origin", "*");
-		try {
-			//should store user id returned in session
-			return uDao.registerUser(user);
-//			if (userId > 0) {
-//				return "1";
-//			}
-			
-			//return "ERROR";
-		} catch (EmptyResultDataAccessException e) {
-			return "ERRORRR: " + e.getLocalizedMessage();
+		UserInfo user = new UserInfo();
+		user.email = email;
+		user.password = password;
+		user.displayName = displayName;
+		user.preferences = new ArrayList<Preference>();
+		for(String p:prefs) {
+			Preference pref = new Preference(p);
+			user.preferences.add(pref);
 		}
+		return uDao.registerUser(user);
 	}
 
+	@GetMapping("/api/addEvent/{eventTitle}/{description}/{preferenceCategory}/{location}/{eventDateTime}/{createdUserId}")
+	@ResponseBody
+	public void addEvent(@PathVariable("eventTitle") String eventTitle, @PathVariable("description") String description, 
+			@PathVariable("preferenceCategory") String preferenceCategory, @PathVariable("location") String location,
+			@PathVariable("eventDateTime") String eventDateTime, @PathVariable("createdUserId") int createdUserId, HttpServletResponse response) {
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		Event event = new Event();
+		event.name = eventTitle;
+		event.description = description;
+		event.activityType = preferenceCategory;
+		event.eventLocation = location;
+		event.createdUserId = createdUserId;
+		//DateTime string passed by front end should be in this format: "YYYY-MM-DD hh:mm:ss"
+		event.eventDateTime = event.convertStringtoDateTime(eventDateTime);
+		uDao.addEvent(event);
+		
+	}
+	
+	@GetMapping("/api/modifyEvent/{eventId}/{eventTitle}/{description}/{preferenceCategory}/{location}/{eventDateTime}/{createdUserId}")
+	@ResponseBody
+	public void modifyEvent(@PathVariable("eventId") int eventId, @PathVariable("eventTitle") String eventTitle, @PathVariable("description") String description, 
+			@PathVariable("preferenceCategory") String preferenceCategory, @PathVariable("location") String location,
+			@PathVariable("eventDateTime") String eventDateTime, @PathVariable("createdUserId") int createdUserId, HttpServletResponse response) {
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		Event event = new Event();
+		event.eventId = eventId;
+		event.name = eventTitle;
+		event.description = description;
+		event.activityType = preferenceCategory;
+		event.eventLocation = location;
+		event.createdUserId = createdUserId;
+		//DateTime string passed by front end should be in this format: "YYYY-MM-DD hh:mm:ss"
+		event.eventDateTime = event.convertStringtoDateTime(eventDateTime);
+		uDao.modifyEvent(event);
+		
+	}
+	
+	@GetMapping("/api/getAllEvents")
+	@ResponseBody
+	public List<Event> getAllEvents(HttpServletResponse response) {
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return uDao.getAllActiveEvents();
+		
+	}
+	
+	@GetMapping("/api/getMatchingEvents/{id}")
+	@ResponseBody
+	public List<Event> getMatchingEvents(@PathVariable("id") int userId, HttpServletResponse response) {
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return uDao.getMatchingEvents(userId);
+		
+	}
+	
+	
 }

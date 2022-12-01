@@ -3,6 +3,8 @@ package com.events.studentevents.dao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,11 +55,11 @@ public class UserDAOImp implements UserDAO {
 	//TODO: Weird error, returns -1?
 
 	@Override
-	public String registerUser(UserInfo user) {
+	public int registerUser(UserInfo user) {
 		int userId = -1;
 		try {
 			if(userExists(user.email)){
-				return String.valueOf(userId);
+				return -1;
 			}
 			
 			KeyHolder keys = new GeneratedKeyHolder();
@@ -70,10 +72,9 @@ public class UserDAOImp implements UserDAO {
 				ps.setString(3, user.displayName);
 				return ps;
 			}, keys);
+			
 			//update userId with the auto-generated id of the newly added user
-			
 			Number n = keys.getKey();
-			
 			userId = n.intValue();
 			
 			//insert into preferences table
@@ -85,9 +86,9 @@ public class UserDAOImp implements UserDAO {
 			}
 		} catch (Exception e) {
 			//Error occurred, return -1
-			return "ERROR: " + e.getLocalizedMessage() + " " + e.getStackTrace().toString();
+			return -1;
 		}
-		return "Status: " + String.valueOf(userId);
+		return userId;
 	}
 	
 	@Override
@@ -163,14 +164,136 @@ public class UserDAOImp implements UserDAO {
 		template.update(sqlString, new Object[] {userId, preference} );
 	}
 	
-	
-	//Returns only a single preferencetype currently TODO: Debug so all are returned
-	
 	@Override
 	public List<String> getPreferenceTypes(){
 		String sqlString = "SELECT preferenceName FROM Preferencetypes";
 		List<String> preferenceTypes =template.queryForList(sqlString, String.class);
 		return preferenceTypes;
 	}
+	
+	@Override
+	public void addEvent(Event event) {
+		updateEventsTable();
+		String sqlString = "INSERT INTO Events(eventTitle, eventDescription, "
+				   + "userId, eventDateTime, eventLocation, "
+				   + "preferenceId, expired) VALUES "
+				   + "(?, ?, ?, ?, ?, (SELECT types.preferenceId FROM Preferencetypes types WHERE types.preferenceName = ?), FALSE)";
+		KeyHolder keys = new GeneratedKeyHolder();
+		template.update(connection -> {
+			PreparedStatement ps = connection.prepareStatement(sqlString, new String[] {"id"});
+			ps.setString(1, event.name);
+			ps.setString(2, event.description);
+			ps.setInt(3, event.createdUserId);
+			ps.setObject(4, event.eventDateTime);
+			ps.setString(5, event.eventLocation);
+			ps.setString(6, event.activityType);
+			return ps;
+		}, keys);
+		//auto-rsvp for creator of the event
+		Number n = keys.getKey();	
+		event.eventId = n.intValue();
+		addRSVP(event.createdUserId, event.eventId);
+		
+		
+	}
+	
+	//Update Events table by setting all events whose eventDateTime is already past current time
+	//since there is no loop to keep doing this, can call this whenever making query to the events table to keep it up to date
+	protected void updateEventsTable() {
+		//String sqlString= "SELECT eventId, eventDateTime FROM Events WHERE expired = FALSE";
+		String sqlString = "UPDATE Events events SET expired = TRUE WHERE eventDateTime <= ?";
+		template.update(connection -> {
+			PreparedStatement ps = connection.prepareStatement(sqlString);
+			//https://www.geeksforgeeks.org/zoneddatetime-now-method-in-java-with-examples/
+			Object now = ZonedDateTime.now(ZoneId.of("America/Los_Angeles"));
+			ps.setObject(1, now);
+			return ps;
+		});
+	}
+	
+	public List<Event> getAllActiveEvents(){
+		updateEventsTable();
+		String sqlString = "SELECT * FROM Events events "
+				+ "LEFT JOIN Preferencetypes types ON types.preferenceId = events.preferenceId "
+				+ "WHERE expired = FALSE";
+		List<Event> events = template.query(sqlString, new ResultSetExtractor<List<Event>>(){
+			@Override
+			public List<Event> extractData(ResultSet rs) throws SQLException,DataAccessException {
+				List<Event> events = new ArrayList<Event>();
+				while(rs.next()) {
+					Event event = new Event();
+					event.name = rs.getString("eventTitle");
+					event.description = rs.getString("eventDescription");
+					event.activityType = rs.getString("preferenceName");
+					event.eventLocation = rs.getString("eventLocation");
+					ZoneId zoneId = ZoneId.of("America/Los_Angeles");
+					event.eventDateTime = rs.getTimestamp("eventDateTime").toLocalDateTime().atZone(zoneId);
+					event.eventId = rs.getInt("eventId");
+					event.createdUserId = rs.getInt("userId");
+					
+					events.add(event);
+				}
+				
+				return events;
+			}
+		});
+		return events;
+	}
+	
+	public void modifyEvent(Event event) {
+		String sqlString = "UPDATE Events" 
+				+ " SET eventTitle = ?, eventDescription = ?, eventDateTime = ?, eventLocation = ?,"
+				+ " preferenceId = (SELECT types.preferenceId FROM Preferencetypes types WHERE types.preferenceName = ?)" 
+				+ " WHERE eventId = ?";
+		template.update(connection -> {
+			PreparedStatement ps = connection.prepareStatement(sqlString);
+			ps.setString(1, event.name);
+			ps.setString(2, event.description);
+			ps.setObject(3, event.eventDateTime);
+			ps.setString(4, event.eventLocation);
+			ps.setString(5, event.activityType);
+			ps.setInt(6, event.eventId);
+			return ps;
+		});
+	}
+	
+	public List<Event> getMatchingEvents(int userId){
+		updateEventsTable();
+		String sqlString = "SELECT * FROM Events events "
+				+ "INNER JOIN Preferences prefs ON prefs.preferenceId = events.preferenceId "
+				+ "LEFT JOIN Preferencetypes types ON types.preferenceId = events.preferenceId "
+				+ "WHERE events.expired = FALSE AND prefs.userId = ?";
+		List<Event> matchingEvents = template.query(sqlString, new ResultSetExtractor<List<Event>>(){
+			@Override
+			public List<Event> extractData(ResultSet rs) throws SQLException,DataAccessException {
+				List<Event> matchingEvents = new ArrayList<Event>();
+				while(rs.next()) {
+					Event event = new Event();
+					event.name = rs.getString("eventTitle");
+					event.description = rs.getString("eventDescription");
+					event.activityType = rs.getString("preferenceName");
+					event.eventLocation = rs.getString("eventLocation");
+					ZoneId zoneId = ZoneId.of("America/Los_Angeles");
+					event.eventDateTime = rs.getTimestamp("eventDateTime").toLocalDateTime().atZone(zoneId);
+					event.eventId = rs.getInt("eventId");
+					event.createdUserId = rs.getInt("userId");
+					
+					matchingEvents.add(event);
+				}
+				
+				return matchingEvents;
+			}
+		}, new Object[]{userId});
+		
+		return matchingEvents;
+	}
+	
+	//optional
+	public void addRSVP(int userId, int eventId) {
+		String sqlString = "INSERT INTO RSVP(userId, eventId)" 
+				+ " VALUES (?, ?)";
+		template.update(sqlString, new Object[] {userId, eventId} );
+	}
+	
 
 }

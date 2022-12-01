@@ -22,8 +22,8 @@ public class Preference {
 		this.preferenceName = s;
 	}
 	
-	public Preference() {
-	}
+	 public Preference() {
+	 }
 //	
 //	public Preference(String s, boolean a) {
 //		this.alert = a;

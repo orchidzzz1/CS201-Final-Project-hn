@@ -184,7 +184,7 @@ public class UserDAOImp implements UserDAO {
 			ps.setString(1, event.name);
 			ps.setString(2, event.description);
 			ps.setInt(3, event.createdUserId);
-			ps.setObject(4, event.eventDateTime);
+			ps.setString(4, event.eventDateTime);
 			ps.setString(5, event.eventLocation);
 			ps.setString(6, event.activityType);
 			return ps;
@@ -227,7 +227,7 @@ public class UserDAOImp implements UserDAO {
 					event.activityType = rs.getString("preferenceName");
 					event.eventLocation = rs.getString("eventLocation");
 					ZoneId zoneId = ZoneId.of("America/Los_Angeles");
-					event.eventDateTime = rs.getTimestamp("eventDateTime").toLocalDateTime().atZone(zoneId);
+					event.eventDateTime = rs.getString("eventDateTime");
 					event.eventId = rs.getInt("eventId");
 					event.createdUserId = rs.getInt("userId");
 					
@@ -274,7 +274,7 @@ public class UserDAOImp implements UserDAO {
 					event.activityType = rs.getString("preferenceName");
 					event.eventLocation = rs.getString("eventLocation");
 					ZoneId zoneId = ZoneId.of("America/Los_Angeles");
-					event.eventDateTime = rs.getTimestamp("eventDateTime").toLocalDateTime().atZone(zoneId);
+					event.eventDateTime = rs.getString("eventDateTime");
 					event.eventId = rs.getInt("eventId");
 					event.createdUserId = rs.getInt("userId");
 					

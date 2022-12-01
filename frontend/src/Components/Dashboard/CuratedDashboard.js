@@ -10,7 +10,7 @@ import AllPosts from "../Posts/AllPosts";
 
 export const CuratedDashboard = () => {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('profile')))
-  const authenticated = user?.authenticated
+  const displayName = user?.displayName
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -19,13 +19,13 @@ export const CuratedDashboard = () => {
     setUser(JSON.parse(localStorage.getItem('profile')))
     localStorage.setItem('view', 1);
     
-    if (authenticated === -1 || authenticated === null) {
+    if (displayName === -1 || displayName === null) {
       console.log("not auth");
       navigate('/'); 
 
     }
     dispatch(actionFetchCurated);    
-  }, [location, authenticated, navigate, dispatch]);
+  }, [location, displayName, navigate, dispatch]);
 
   return (
     <div>

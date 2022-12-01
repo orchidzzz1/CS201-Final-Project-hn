@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+//import org.springframework.web.bind.annotation.PostMapping;
+//import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.events.studentevents.dao.UserDAO;
@@ -136,6 +136,25 @@ public class UserController {
 		
 	}
 	
+	@GetMapping("/api/modifyEvent/{eventId}/{eventTitle}/{description}/{preferenceCategory}/{location}/{eventDateTime}/{createdUserId}")
+	@ResponseBody
+	public void modifyEvent(@PathVariable("eventId") int eventId, @PathVariable("eventTitle") String eventTitle, @PathVariable("description") String description, 
+			@PathVariable("preferenceCategory") String preferenceCategory, @PathVariable("location") String location,
+			@PathVariable("eventDateTime") String eventDateTime, @PathVariable("createdUserId") int createdUserId, HttpServletResponse response) {
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		Event event = new Event();
+		event.eventId = eventId;
+		event.name = eventTitle;
+		event.description = description;
+		event.activityType = preferenceCategory;
+		event.eventLocation = location;
+		event.createdUserId = createdUserId;
+		//DateTime string passed by front end should be in this format: "YYYY-MM-DD hh:mm:ss"
+		event.eventDateTime = event.convertStringtoDateTime(eventDateTime);
+		uDao.modifyEvent(event);
+		
+	}
+	
 	@GetMapping("/api/getAllEvents")
 	@ResponseBody
 	public List<Event> getAllEvents(HttpServletResponse response) {
@@ -151,4 +170,6 @@ public class UserController {
 		return uDao.getMatchingEvents(userId);
 		
 	}
+	
+	
 }

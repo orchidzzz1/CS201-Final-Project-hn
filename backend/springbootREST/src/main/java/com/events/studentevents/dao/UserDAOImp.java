@@ -260,8 +260,8 @@ public class UserDAOImp implements UserDAO {
 	public List<Event> getMatchingEvents(int userId){
 		updateEventsTable();
 		String sqlString = "SELECT * FROM Events events "
+				+ "INNER JOIN Preferences prefs ON prefs.preferenceId = events.preferenceId "
 				+ "LEFT JOIN Preferencetypes types ON types.preferenceId = events.preferenceId "
-				+ "LEFT JOIN Preferences prefs ON prefs.preferenceId = events.preferenceId"
 				+ "WHERE events.expired = FALSE AND prefs.userId = ?";
 		List<Event> matchingEvents = template.query(sqlString, new ResultSetExtractor<List<Event>>(){
 			@Override

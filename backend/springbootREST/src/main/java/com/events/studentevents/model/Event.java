@@ -22,7 +22,7 @@ public class Event {
     public String description;
     public String activityType;
     //"yyyy-MM-ddTHH:mm:ss-08:00" is the format of the string that front end will receive
-    public ZonedDateTime eventDateTime;
+    public String eventDateTime;
     public String eventLocation;
     public boolean expired;
     public int createdUserId;
@@ -31,11 +31,11 @@ public class Event {
     
     //https://stackoverflow.com/questions/44925840/java-time-format-datetimeparseexception-text-could-not-be-parsed-at-index-3
     //https://stackoverflow.com/questions/62221005/java-8-convert-date-string-into-date-with-timezone
-    public ZonedDateTime convertStringtoDateTime(String s) {
-    	DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ENGLISH);
-    	LocalDateTime ldt = LocalDateTime.parse(s, f);
-    	ZoneId z = ZoneId.of("America/Los_Angeles");
-    	ZonedDateTime zdt = ldt.atZone(z);  
-		return zdt;
-    }
+//    public ZonedDateTime convertStringtoDateTime(String s) {
+//    	DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ENGLISH);
+//    	LocalDateTime ldt = LocalDateTime.parse(s, f);
+//    	ZoneId z = ZoneId.of("America/Los_Angeles");
+//    	ZonedDateTime zdt = ldt.atZone(z);  
+//		return zdt;
+//    }
 }

@@ -18,7 +18,7 @@ public interface UserDAO {
      * @return userId if registered successfully in order to be stored in session;
 	 *  -1 if failed to add user
      */
-	String registerUser(UserInfo user);
+	int registerUser(UserInfo user);
 	
 
 	/*
@@ -69,6 +69,33 @@ public interface UserDAO {
      * Purpose: can be used for front end to present their list of preferences to users to choose
      */
     public List<String> getPreferenceTypes();
+    
+    /*
+     * Add an event to the event table whenever a user creates a event.
+     * The user is also auto-RSVPed to the event
+     * New event's expired var should be set to false
+     * postedEventTime column in database should be automatically set to current time for the newly inserted entry
+     * @param activityType: the event can only be tagged with one activity type
+     */
+    public void addEvent(Event event);
 
+    /*
+     * Get all events that have not expired yet right at the moment of the query
+     */
+    public List<Event> getAllActiveEvents();
+    
+    /* 
+     * Modify an existing event's description, event date/time, activity type, etc.
+     */
+    public void modifyEvent(Event event);
+    
+    /*
+     * Get a list of events matching the user's preferences
+     */
+    public List<Event> getMatchingEvents(int userId);
 	
+    /*
+     * might not get to add this feature on front end
+     */
+    public void addRSVP(int userId, int eventId);
 }
